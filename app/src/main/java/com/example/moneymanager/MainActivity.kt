@@ -48,6 +48,15 @@ class MainActivity : ComponentActivity() {
 
     fun setMonthView() {
         monthYearText.text = monthYearFromDate(selectedDate)
+        var dayList : ArrayList<String> = daysInMonthArray(selectedDate)
+        var adapter : CalendarAdapter = CalendarAdapter(dayList)
+    }
+
+    fun daysInMonthArray(date: LocalDate): ArrayList<String>{
+        var dayList : ArrayList<String> = arrayListOf()
+        monthYearText.text = monthYearFromDate(date)
+
+        return dayList
     }
 }
 

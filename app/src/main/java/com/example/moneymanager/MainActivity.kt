@@ -3,6 +3,7 @@ package com.example.moneymanager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -10,7 +11,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), OnItemListener {
     lateinit var monthYearText: TextView
     lateinit var selectedDate: LocalDate
     lateinit var recyclerView: RecyclerView
@@ -21,7 +22,6 @@ class MainActivity : ComponentActivity() {
 
         monthYearText = findViewById(R.id.monthYearText)
         recyclerView = findViewById(R.id.recyclerView)
-
 
         val prevBtn: Button = findViewById(R.id.preBtn)
         val nextBtn: Button = findViewById(R.id.nextBtn)
@@ -40,6 +40,12 @@ class MainActivity : ComponentActivity() {
         }
 
 
+
+    }
+
+    private fun yearMonthFromDate(date: LocalDate) :String{
+        val formatter:DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월")
+        return date.format(formatter)
     }
 
     private fun monthYearFromDate(date: LocalDate): String? {
@@ -51,7 +57,7 @@ class MainActivity : ComponentActivity() {
     private fun setMonthView() {
         monthYearText.text = monthYearFromDate(selectedDate)
         val dayList : ArrayList<String> = daysInMonthArray(selectedDate)
-        val adapter = CalendarAdapter(dayList)
+        val adapter = CalendarAdapter(dayList,this)
         val manager : RecyclerView.LayoutManager = GridLayoutManager(applicationContext,7)
         recyclerView.layoutManager = manager
         recyclerView.adapter = adapter
@@ -73,6 +79,11 @@ class MainActivity : ComponentActivity() {
         }
 
         return dayList
+    }
+
+    override fun onItemClick(dayText:String, position:Int) {
+        val yearMonDay :String = yearMonthFromDate(selectedDate)+" "+ dayText + "일"
+        Toast.makeText(this,yearMonDay,Toast.LENGTH_SHORT).show()
     }
 }
 

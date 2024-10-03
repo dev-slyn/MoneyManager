@@ -1,84 +1,74 @@
 package com.example.moneymanager
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.text.util.LocalePreferences.FirstDayOfWeek.Days
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.example.moneymanager.CalendarAdapter.CalendarViewHolder
+import java.time.LocalDate
 
-class CalendarAdapter(val context: Context, val calendarLayout: LinearLayout, val date: Date) :
-    RecyclerView.Adapter<CalendarAdapter.CalendarItemHolder>() {
+@SuppressLint("NotConstructor")
+class CalendarAdapter(var dayList: ArrayList<String>,context: Context) : RecyclerView.Adapter<CalendarViewHolder>() {
 
-    private val TAG = javaClass.simpleName
-    var dataList: ArrayList<Int> = arrayListOf()
+    var onItemListener: OnItemListener? = null
 
-    // FurangCalendar을 이용하여 날짜 리스트 세팅
-    var furangCalendar: FurangCalendar = FurangCalendar(date)
-    init {
-        furangCalendar.initBaseCalendar()
-        dataList = furangCalendar.dateList
+    fun CalendarAdapter(dayList: ArrayList<String>, onItemListener: OnItemListener?) {
+        this.dayList = dayList
+        this.onItemListener = onItemListener
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(R.layout.calendar_cell, parent, false)
+
+        return CalendarViewHolder(view)
     }
 
-    interface ItemClick {
-        fun onClick(view: View, position: Int)
-    }
+    override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) {
 
-    var itemClick: ItemClick? = null
+        val day :String = dayList.get(position)
+//        if(day==null)
+//            holder.dayText.text = ""
+//        else
+//            holder.dayText.text = day.dayOfMonth.toString()
 
-    override fun onBindViewHolder(holder: CalendarItemHolder, position: Int) {
-        holder?.bind(dataList[position], position, context)
+        holder.dayText.text = day
 
-        // list_item_calendar 높이 지정
-        val h = calendarLayout.height / 6
-        holder.itemView.layoutParams.height = h
-        if (itemClick != null) {
-            holder?.itemView?.setOnClickListener { v ->
-                itemClick?.onClick(v, position)
+//        holder.dayText.text = dayList[position]
+        val context = holder.dayText.context
+        if((position+1)%7==0)
+            holder.dayText.setTextColor(ContextCompat.getColor(context,R.color.purple_700))
+        else if (position==0||position%7==0)
+            holder.dayText.setTextColor(ContextCompat.getColor(context,R.color.purple_200))
 
-            }
+        holder.itemView.setOnClickListener {
+            onItemListener?.onItemClick(day, position)
+            Toast.makeText(context,day,Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarItemHolder {
-        val view =
-            LayoutInflater.from(context).inflate(R.layout.calendar_cell, parent, false)
-        return CalendarItemHolder(view)
-    }
-
-    override fun getItemCount(): Int = dataList.size
-
-    inner class CalendarItemHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
-
-        var day_Text: TextView = itemView!!.findViewById(R.id.dayText)
-//        var itemCalendarDotView: View = itemView!!.item_calendar_dot_view
-
-        fun bind(data: Int, position: Int, context: Context) {
-
-            val firstDateIndex = furangCalendar.prevTail
-            val lastDateIndex = dataList.size - furangCalendar.nextHead - 1
-
-            // 날짜 표시
-            day_Text.setText(data.toString())
-
-            // 오늘 날짜 처리
-            var dateString: String = SimpleDateFormat("dd", Locale.KOREA).format(date)
-            var dateInt = dateString.toInt()
-//            if (dataList[position] == dateInt) {
-//                itemCalendarDateText.setTypeface(itemCalendarDateText.typeface, Typeface.BOLD)
-//            }
+//        holder.itemView.setOnClickListener(View.OnClickListener {
+//            fun onClick(view: View){
+//                val iYear = day.year
+//                val iMonth = day.monthValue
+//                val iDay = day.dayOfMonth
 //
-//            // 현재 월의 1일 이전, 현재 월의 마지막일 이후 값의 텍스트를 회색처리
-//            if (position < firstDateIndex || position > lastDateIndex) {
-//                itemCalendarDateText.setTextAppearance(R.style.LightColorTextViewStyle)
-//                itemCalendarDotView.background = null
+//                val yearMonDay: String = iYear.toString()+"년"+iMonth+"월"+iDay+"일"
+//                Toast.makeText(holder.itemView.context,yearMonDay,Toast.LENGTH_SHORT)
 //            }
-        }
+//        })
 
+    }
+
+    override fun getItemCount(): Int {
+        return dayList.size
+    }
+
+    inner class CalendarViewHolder(itemView: View) : ViewHolder(itemView) {
+
+        var dayText: TextView = itemView.findViewById(R.id.dayText)
     }
 }
